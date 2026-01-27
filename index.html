@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Janta Inter College | Master Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3c72;
+            --secondary: #2a5298;
+            --success: #4CAF50;
+            --error: #FF5252;
+            --bg: #f4f7f6;
+            --white: #ffffff;
+            --text: #333;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; color: var(--text); }
+        .container { width: 100%; max-width: 500px; background: var(--white); border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 25px; text-align: center; }
+        .header h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        .header p { font-size: 0.85rem; opacity: 0.9; }
+        .main-box { padding: 25px; }
+        
+        /* Login Form Styles */
+        .login-group { margin-bottom: 15px; text-align: left; }
+        .login-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .login-group input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; outline: none; }
+        
+        .level-card { background: #fff; border: 2px solid #eee; padding: 20px; border-radius: 15px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
+        .level-card:hover { border-color: var(--secondary); background: #f0f7ff; transform: translateY(-3px); }
+        .level-card h3 { color: var(--primary); font-size: 1.2rem; margin-bottom: 5px; }
+        .prog-bar { width: 100%; height: 10px; background: #eee; border-radius: 10px; margin-bottom: 20px; display: none; overflow: hidden; }
+        #fill { height: 100%; background: var(--success); width: 0%; transition: 0.4s; }
+        .option { padding: 16px; border: 2px solid #f0f0f0; border-radius: 14px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; font-weight: 500; display: flex; align-items: center; background: #fff; }
+        .correct { background: #e8f5e9 !important; border-color: var(--success) !important; color: #2e7d32; }
+        .wrong { background: #ffebee !important; border-color: var(--error) !important; color: #c62828; }
+        .disabled { pointer-events: none; }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .screen { display: none; }
+        .active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Admin Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.8rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>जनता इंटर कॉलेज</h1>
+        <p>चरगांवा, गोरखपुर (उ.प्र.)</p>
+        <p>*Made by Priyanshu Yadav (Class 9th)*</p>
+    </div>
+
+    <div class="main-box">
+        <div id="login-screen" class="screen active">
+            <h2 style="margin-bottom: 20px; text-align: center;">छात्र लॉगिन</h2>
+            <div class="login-group">
+                <label>पूरा नाम:</label>
+                <input type="text" id="stu-name" placeholder="अपना नाम लिखें">
+            </div>
+            <div class="login-group">
+                <label>रोल नंबर:</label>
+                <input type="number" id="stu-roll" placeholder="रोल नंबर">
+            </div>
+            <div class="login-group">
+                <label>कक्षा:</label>
+                <input type="text" id="stu-class" placeholder="जैसे: 9th">
+            </div>
+            <button class="btn" onclick="checkLogin()">क्विज़ के लिए आगे बढ़ें</button>
+            <p onclick="adminPanel()" style="margin-top:20px; font-size:0.7rem; color:#888; cursor:pointer; text-align:center;">Admin Login</p>
+        </div>
+
+        <div class="prog-bar" id="progBar"><div id="fill"></div></div>
+
+        <div id="level-screen" class="screen">
+            <h2 style="margin-bottom: 20px; text-align: center;">अपना स्तर चुनें</h2>
+            <div class="level-card" onclick="initQuiz('level1')"><h3>प्राथमिक (Level 1)</h3><p>20 प्रश्न</p></div>
+            <div class="level-card" onclick="initQuiz('level2')"><h3>जूनियर (Level 2)</h3><p>30 प्रश्न</p></div>
+            <div class="level-card" onclick="initQuiz('level3')"><h3>सीनियर (Level 3)</h3><p>50 प्रश्न</p></div>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+            <div style="display:flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; font-weight: bold;">
+                <span id="level-name-text">Level</span>
+                <span id="q-count">0/0</span>
+            </div>
+            <h3 id="question-text" style="margin-bottom: 25px;">प्रश्न लोड हो रहा है...</h3>
+            <div id="options-container"></div>
+            <button class="btn" id="next-btn" style="display: none;" onclick="handleNext()">अगला प्रश्न</button>
+        </div>
+
+        <div id="result-screen" class="screen" style="text-align: center;">
+            <h2 id="res-title">शानदार!</h2>
+            <div style="font-size: 3.5rem; margin: 25px 0; color: var(--primary); font-weight: 700;" id="final-score">0</div>
+            <p id="res-msg" style="margin-bottom: 25px;"></p>
+            <button class="btn" onclick="location.reload()">मुख्य पृष्ठ पर जाएं</button>
+        </div>
+
+        <div id="admin-screen" class="screen">
+            <h2 style="text-align:center;">छात्र रिकॉर्ड</h2>
+            <div style="overflow-x:auto;">
+                <table id="admin-table">
+                    <thead><tr><th>नाम</th><th>रोल</th><th>कक्षा</th><th>स्कोर</th></tr></thead>
+                    <tbody id="admin-body"></tbody>
+                </table>
+            </div>
+            <button class="btn" style="background:#555;" onclick="location.reload()">वापस जाएं</button>
+            <button class="btn" style="background:red;" onclick="clearData()">डेटा साफ़ करें</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- डेटाबेस (सारे सवाल वही हैं) ---
+const quizData = {
+    level1: { name: "प्राथमिक स्तर", limit: 20, questions: [
+        {q: "भारत का राष्ट्रीय पशु?", a: ["बाघ", "शेर", "हाथी", "चीता"], c: 0},
+        {q: "भारत का राष्ट्रीय फूल?", a: ["गुलाब", "कमल", "सूरजमुखी", "गेंदा"], c: 1},
+        {q: "गुब्बारे किस गैस से भरे जाते हैं?", a: ["ऑक्सीजन", "नाइट्रोजन", "हेलियम", "हाइड्रोजन"], c: 2},
+        {q: "ताजमहल किसने बनवाया?", a: ["अकबर", "शाहजहाँ", "जहाँगीर", "बाबर"], c: 1},
+        {q: "भारत का राष्ट्रीय पक्षी?", a: ["तोता", "मोर", "बाज", "कोयल"], c: 1},
+        {q: "इंसान के शरीर की सबसे लंबी हड्डी?", a: ["खोपड़ी", "फीमर", "रीढ़", "हाथ"], c: 1},
+        {q: "भारत की सबसे लंबी नदी?", a: ["यमुना", "ब्रह्मपुत्र", "गंगा", "नर्मदा"], c: 2},
+        {q: "सप्ताह में कितने दिन होते हैं?", a: ["5", "6", "7", "8"], c: 2},
+        {q: "राष्ट्रीय खेल?", a: ["क्रिकेट", "हॉकी", "फुटबॉल", "कबड्डी"], c: 1},
+        {q: "बुद्ध का बचपन का नाम?", a: ["सिद्धार्थ", "राहुल", "वर्धमान", "अर्जुन"], c: 0}
+         ,
+            {q: "भारत का राष्ट्रीय फूल कौन सा है?", a: ["गुलाब", "कमल", "सूरजमुखी", "गेंदा"], c: 1},
+            {q: "गुब्बारे किस गैस से भरे जाते हैं?", a: ["ऑक्सीजन", "नाइट्रोजन", "हेलियम", "हाइड्रोजन"], c: 2},
+            {q: "ताजमहल किसने बनवाया था?", a: ["अकबर", "शाहजहाँ", "जहाँगीर", "बाबर"], c: 1},
+            {q: "भारत का राष्ट्रीय पक्षी कौन सा है?", a: ["तोता", "मोर", "बाज", "कोयल"], c: 1},
+            {q: "इंसान के शरीर में सबसे लंबी हड्डी कौन सी होती है?", a: ["खोपड़ी", "फीमर (जांघ)", "रीढ़", "हाथ"], c: 1},
+            {q: "भारत की सबसे लंबी नदी कौन सी है?", a: ["यमुना", "ब्रह्मपुत्र", "गंगा", "नर्मदा"], c: 2},
+            {q: "एक सप्ताह में कितने दिन होते हैं?", a: ["5", "6", "7", "8"], c: 2},
+            {q: "भारत का राष्ट्रीय खेल क्या है?", a: ["क्रिकेट", "हॉकी", "फुटबॉल", "कबड्डी"], c: 1},
+            {q: "गौतम बुद्ध का बचपन का नाम क्या था?", a: ["सिद्धार्थ", "राहुल", "वर्धमान", "अर्जुन"], c: 0},
+            {q: "पृथ्वी का प्राकृतिक उपग्रह कौन सा है?", a: ["सूर्य", "मंगल", "चन्द्रमा", "बुध"], c: 2},
+            {q: "सौरमंडल का सबसे बड़ा ग्रह कौन सा है?", a: ["शनि", "पृथ्वी", "बृहस्पति", "शुक्र"], c: 2},
+            {q: "पत्ते किस कारण से हरे होते हैं?", a: ["पानी", "मिट्टी", "क्लोरोफिल", "धूप"], c: 2},
+            {q: "भारत का सबसे छोटा राज्य कौन सा है?", a: ["सिक्किम", "गोवा", "त्रिपुरा", "मिजोरम"], c: 1},
+            {q: "टेलीविजन का आविष्कार किसने किया?", a: ["न्यूटन", "एडिसन", "जे. एल. बेयर्ड", "ग्राहम बेल"], c: 2},
+            {q: "इंद्रधनुष में कितने रंग होते हैं?", a: ["5", "6", "7", "8"], c: 2},
+            {q: "सूर्य किस दिशा से निकलता है?", a: ["पश्चिम", "उत्तर", "दक्षिण", "पूर्व"], c: 3},
+            {q: "हमारे शरीर में कुल कितनी हड्डियाँ होती हैं?", a: ["200", "206", "210", "250"], c: 1},
+            {q: "भारत के पहले प्रधानमंत्री कौन थे?", a: ["गांधी जी", "नेहरू जी", "पटेल जी", "शास्त्री जी"], c: 1},
+            {q: "क्षेत्रफल में भारत का सबसे बड़ा राज्य कौन सा है?", a: ["यूपी", "एमपी", "राजस्थान", "महाराष्ट्र"], c: 2}
+    ]},
+    level2: { name: "जूनियर स्तर", limit: 30, questions: [
+        {q: "भारत छोड़ो आंदोलन कब हुआ?", a: ["1920", "1930", "1942", "1947"], c: 2},
+        {q: "ISRO का मुख्यालय कहाँ है?", a: ["दिल्ली", "मुंबई", "बेंगलुरु", "चेन्नई"], c: 2},
+        {q: "रतौंधी किस विटामिन की कमी से?", a: ["C", "D", "A", "B"], c: 2},
+         {q: "भारत छोड़ो आंदोलन कब शुरू हुआ?", a: ["1920", "1930", "1942", "1947"], c: 2},
+            {q: "भोपाल गैस त्रासदी किस वर्ष हुई थी?", a: ["1984", "1980", "1990", "1975"], c: 0},
+            {q: "लोकसभा का सदस्य बनने के लिए न्यूनतम आयु?", a: ["18 वर्ष", "21 वर्ष", "25 वर्ष", "30 वर्ष"], c: 2},
+            {q: "संस्कृत व्याकरण का जनक किसे कहा जाता है?", a: ["कालिदास", "तुलसीदास", "महर्षि पाणिनि", "वेदव्यास"], c: 2},
+            {q: "टिहरी बाँध किस नदी पर बना है?", a: ["गंगा", "भागीरथी", "नर्मदा", "यमुना"], c: 1},
+            {q: "ISRO का पूरा नाम क्या है?", a: ["Indian Solar Research Org", "Indian Space Research Organisation", "International Space Org", "India Space Research Office"], c: 1},
+            {q: "रतौंधी किस विटामिन की कमी से होती है?", a: ["विटामिन C", "विटामिन D", "विटामिन A", "विटामिन B"], c: 2},
+            {q: "नागार्जुन सागर बाँध किस नदी पर स्थित है?", a: ["कृष्णा", "कावेरी", "महानदी", "यमुना"], c: 0},
+            {q: "विश्व का सबसे बड़ा महाद्वीप कौन सा है?", a: ["अफ्रीका", "यूरोप", "एशिया", "ऑस्ट्रेलिया"], c: 2},
+            {q: "नालंदा विश्वविद्यालय की स्थापना किसने की?", a: ["चंद्रगुप्त", "अशोक", "कुमार गुप्त प्रथम", "हर्षवर्धन"], c: 2},
+            {q: "पौधों का रसोईघर किसे कहा जाता है?", a: ["जड़", "तना", "फूल", "पत्ती"], c: 3},
+            {q: "गोरखपुर किस नदी के तट पर स्थित है?", a: ["गंगा", "राप्ती", "यमुना", "सरयू"], c: 1},
+            {q: "रतौंधी किस अंग को प्रभावित करती है?", a: ["कान", "नाक", "आँख", "गला"], c: 2},
+            {q: "सिक्ख धर्म के संस्थापक कौन थे?", a: ["गुरु गोविंद सिंह", "गुरु नानक देव", "गुरु अर्जुन देव", "गुरु तेग बहादुर"], c: 1},
+            {q: "भारत की पहली महिला प्रधानमंत्री?", a: ["प्रतिभा पाटिल", "सरोजिनी नायडू", "इंदिरा गांधी", "सुषमा स्वराज"], c: 2},
+            {q: "कंप्यूटर का जनक किसे कहा जाता है?", a: ["बिल गेट्स", "मार्क जुकरबर्ग", "चार्ल्स बैबेज", "स्टीव जॉब्स"], c: 2},
+            {q: "विश्व का सबसे बड़ा देश (क्षेत्रफल में)?", a: ["चीन", "रूस", "भारत", "अमेरिका"], c: 1},
+            {q: "वायुमंडल में सबसे अधिक गैस कौन सी है?", a: ["ऑक्सीजन", "CO2", "नाइट्रोजन", "आर्गन"], c: 2},
+            {q: "अयोध्या किस नदी के तट पर स्थित है?", a: ["गंगा", "सरयू", "यमुना", "गोमती"], c: 1},
+            {q: "भारत का सबसे ऊँचा बाँध कौन सा है?", a: ["भाखड़ा", "हीराकुंड", "टिहरी", "सरदार सरोवर"], c: 2}
+    ]},
+    level3: { name: "सीनियर स्तर", limit: 50, questions: [
+        {q: "प्रारूप समिति के अध्यक्ष?", a: ["नेहरू", "प्रसाद", "अम्बेडकर", "पटेल"], c: 2},
+         {q: "प्रारूप समिति (Drafting Committee) के अध्यक्ष कौन थे?", a: ["नेहरू", "प्रसाद", "डॉ. बी.आर. अम्बेडकर", "पटेल"], c: 2},
+            {q: "SAARC की स्थापना किस वर्ष हुई थी?", a: ["1980", "1985", "1990", "1995"], c: 1},
+            {q: "सफेद क्रांति (White Revolution) के जनक कौन हैं?", a: ["स्वामीनाथन", "वर्गीज़ कुरियन", "सैम पित्रोदा", "हीरालाल चौधरी"], c: 1},
+            {q: "विश्व की सबसे लम्बी पर्वतमाला कौन सी है?", a: ["हिमालय", "रॉकीज़", "एंडीज", "आल्प्स"], c: 2},
+            {q: "बंगाल का विभाजन 1905 में किसने किया?", a: ["लॉर्ड डलहौजी", "लॉर्ड कर्जन", "लॉर्ड कैनिंग", "लॉर्ड इरविन"], c: 1},
+            {q: "संविधान सभा की 'आत्मा' किसे कहा जाता है?", a: ["मौलिक अधिकार", "नीति निदेशक तत्व", "संवैधानिक उपचारों का अधिकार", "प्रस्तावना"], c: 2},
+            {q: "RBI के प्रतीक चिन्ह में कौन सा पेड़ है?", a: ["बरगद", "नीम", "ताड़ (Palm Tree)", "पीपल"], c: 2},
+            {q: "विश्व की पहली महिला प्रधानमंत्री कौन थी?", a: ["इंदिरा गांधी", "सिरिमावो भंडारनायके", "मार्गरेट थैचर", "बेनजीर भुट्टो"], c: 1},
+            {q: "विश्व का सबसे गहरा गर्त (Trench) कौन सा है?", a: ["जावा गर्त", "मेरियाना गर्त", "टोंगा गर्त", "रोमचे गर्त"], c: 1},
+            {q: "IPS का पूरा नाम क्या है?", a: ["Indian Police Service", "Indian Public Service", "Indian Private Service", "Indian Petrol Service"], c: 0},
+            {q: "भारत में पहली जनगणना कब हुई थी?", a: ["1850", "1872", "1881", "1901"], c: 1},
+            {q: "कहाँ कच्छ की खाड़ी स्थित है?", a: ["भारत", "पाकिस्तान", "श्रीलंका", "बांग्लादेश"], c: 0},
+            {q: "मानव शरीर का सबसे बड़ा अंग कौन सा है?", a: ["लिवर", "हृदय", "त्वचा", "दिमाग"], c: 2},
+            {q: "स्वतंत्र भारत के पहले गृहमंत्री कौन थे?", a: ["नेहरू", "पटेल", "आजाद", "शास्त्री"], c: 1},
+            {q: "किस नदी पर हीराकुंड बाँध स्थित है?", a: ["गंगा", "नर्मदा", "महानदी", "गोदावरी"], c: 2}
+    ]}
+};
+
+let activeQs = [], currentIdx = 0, score = 0, currentLimit = 0;
+let studentInfo = {};
+
+// --- लॉगिन लॉजिक ---
+function checkLogin() {
+    const name = document.getElementById('stu-name').value;
+    const roll = document.getElementById('stu-roll').value;
+    const cls = document.getElementById('stu-class').value;
+    if(name && roll && cls) {
+        studentInfo = { name, roll, class: cls };
+        document.getElementById('login-screen').classList.remove('active');
+        document.getElementById('level-screen').classList.add('active');
+    } else { alert("कृपया पूरी जानकारी भरें!"); }
+}
+
+// --- क्विज़ लॉजिक ---
+function initQuiz(lvl) {
+    const data = quizData[lvl];
+    currentLimit = data.limit;
+    activeQs = [...data.questions].sort(() => 0.5 - Math.random()).slice(0, currentLimit);
+    currentIdx = 0; score = 0;
+    document.getElementById('level-name-text').innerText = data.name;
+    document.getElementById('level-screen').classList.remove('active');
+    document.getElementById('quiz-screen').classList.add('active');
+    document.getElementById('progBar').style.display = 'block';
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = activeQs[currentIdx];
+    document.getElementById('q-count').innerText = `${currentIdx + 1}/${activeQs.length}`;
+    document.getElementById('question-text').innerText = q.q;
+    document.getElementById('next-btn').style.display = 'none';
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+    q.a.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.innerHTML = `<span style="width:30px; font-weight:bold;">${String.fromCharCode(65+i)}.</span> ${opt}`;
+        div.onclick = () => checkAns(div, i);
+        container.appendChild(div);
+    });
+    document.getElementById('fill').style.width = (currentIdx / activeQs.length) * 100 + '%';
+}
+
+function checkAns(el, idx) {
+    const correct = activeQs[currentIdx].c;
+    const all = document.querySelectorAll('.option');
+    all.forEach(opt => opt.classList.add('disabled'));
+    if(idx === correct) { el.classList.add('correct'); score++; }
+    else { el.classList.add('wrong'); all[correct].classList.add('correct'); }
+    document.getElementById('next-btn').style.display = 'block';
+}
+
+function handleNext() {
+    currentIdx++;
+    if(currentIdx < activeQs.length) renderQuestion();
+    else finish();
+}
+
+function finish() {
+    document.getElementById('quiz-screen').classList.remove('active');
+    document.getElementById('progBar').style.display = 'none';
+    document.getElementById('result-screen').classList.add('active');
+    document.getElementById('final-score').innerText = `${score} / ${activeQs.length}`;
+    
+    // रिकॉर्ड सेव करना
+    let records = JSON.parse(localStorage.getItem('jic_results')) || [];
+    studentInfo.score = `${score}/${activeQs.length}`;
+    records.push(studentInfo);
+    localStorage.setItem('jic_results', JSON.stringify(records));
+}
+
+// --- एडमिन पैनल लॉजिक ---
+function adminPanel() {
+    const pass = prompt("एडमिन पासवर्ड डालें:");
+    if(pass === "priyanshu8284") {
+        document.getElementById('login-screen').classList.remove('active');
+        document.getElementById('admin-screen').classList.add('active');
+        const body = document.getElementById('admin-body');
+        body.innerHTML = '';
+        const records = JSON.parse(localStorage.getItem('jic_results')) || [];
+        records.forEach(r => {
+            body.innerHTML += `<tr><td>${r.name}</td><td>${r.roll}</td><td>${r.class}</td><td>${r.score}</td></tr>`;
+        });
+    } else { alert("गलत पासवर्ड!"); }
+}
+
+function clearData() {
+    if(confirm("क्या आप सारा रिकॉर्ड डिलीट करना चाहते हैं?")) {
+        localStorage.removeItem('jic_results');
+        location.reload();
+    }
+}
+</script>
+</body>
+</html>
